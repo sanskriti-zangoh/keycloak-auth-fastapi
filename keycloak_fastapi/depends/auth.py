@@ -1,37 +1,44 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import OAuth2AuthorizationCodeBearer
 from core.settings import load_settings, AuthSettings
 
-from jwt import PyJWKClient
-import jwt
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2AuthorizationCodeBearer
+from keycloak import KeycloakOpenID, KeycloakAdmin
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
+
 
 auth: AuthSettings = load_settings("AuthSettings")
 
-app = FastAPI()
+# Configure Keycloak
+keycloak_openid = KeycloakOpenID(
+    server_url=auth.server_url,
+    client_id=auth.keycloak_client_id,
+    realm_name=auth.realm_name,
+    client_secret_key=auth.keycloak_client_secret,
+    verify=True
+)
 
-oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/auth",
-    tokenUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/token",
-    refreshUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/token",
+keycloak_admin = KeycloakAdmin(
+    server_url=auth.server_url,
+    username="admin",
+    password="admin",
+    realm_name=auth.realm_name,
+    client_id=auth.keycloak_client_id,
+    client_secret_key=auth.keycloak_client_secret,
+    verify=True
 )
 
 
-async def valid_access_token(
-    access_token: str = Depends(oauth2_scheme)
-):
-    url = f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/certs"
-    optional_custom_headers = {"User-agent": "custom-user-agent"}
-    jwks_client = PyJWKClient(url, headers=optional_custom_headers)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_idp_scheme = OAuth2AuthorizationCodeBearer(
+    authorizationUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/auth",
+    tokenUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/token",
+    refreshUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/token"
+)
 
-    try:
-        signing_key = jwks_client.get_signing_key_from_jwt(access_token)
-        data = jwt.decode(
-            access_token,
-            signing_key.key,
-            algorithms=["RS256"],
-            audience="api",
-            options={"verify_exp": True},
-        )
-        return data
-    except jwt.exceptions.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+oauth2_scheme_google = OAuth2AuthorizationCodeBearer(
+    authorizationUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/auth",
+    tokenUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/token",
+    refreshUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/token"
+)
+

@@ -21,17 +21,3 @@ keycloak_openid = KeycloakOpenID(
     client_secret_key=auth.keycloak_client_secret,
     verify=True
 )
-
-oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/auth",
-    tokenUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/token",
-    refreshUrl=f"{auth.server_url}/realms/{auth.realm_name}/protocol/openid-connect/token",
-)
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    try:
-        user_info = keycloak_openid.userinfo(token)
-        return user_info
-    except Exception as e:
-        raise HTTPException(status_code=401, detail="Invalid authentication")
-    

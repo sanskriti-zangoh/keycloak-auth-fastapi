@@ -40,3 +40,11 @@ class LoginGithubRequest(BaseModel):
 class LoginGithubResponse(BaseModel):
     message: str
     user: ResponseUser
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class User(BaseModel):
+    username: str
+    email: str

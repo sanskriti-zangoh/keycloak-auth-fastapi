@@ -1,3 +1,6 @@
-from depends.auth import (
-    valid_access_token
+
+from depends.auth_password import (
+    get_auth,
+    get_current_user,
+    get_idp_public_key,
 )

@@ -1,4 +1,3 @@
-
 """
 Settings Module.
 """
@@ -6,7 +5,6 @@ Settings Module.
 from functools import lru_cache
 from dotenv import find_dotenv, load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import ValidationError, AnyHttpUrl
 
 class DatabaseSettings(BaseSettings):
     """
@@ -22,14 +20,14 @@ class DatabaseSettings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_prefix="POSTGRES_", case_sensitive=False
+        env_file=".env", env_prefix="DB_", case_sensitive=False, extra="ignore"
     )
-    url: str = "sqlite+aiosqlite:///:memory:"
-    pool_size: int = 8
-    max_overflow: int = 16
-    echo: bool = False
-    pool_pre_ping: bool = False
-    pool_recycle: int = 3600
+    url: str
+    pool_size: int
+    max_overflow: int
+    echo: bool
+    pool_pre_ping: bool
+    pool_recycle: int
 
 class AuthSettings(BaseSettings):
     """
@@ -43,12 +41,17 @@ class AuthSettings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_prefix="KEYCLOAK_", case_sensitive=False
+        env_file=".env", env_prefix="AUTH_", case_sensitive=False, extra="ignore"
     )
-    server_url: str = "http://0.0.0.0:8080"
-    client_id: str = "open_id_client"
-    realm_name: str = "keyauth"
-    client_secret: str = "9m0qsBElC17Bj3A2cfI5xkl54Xsi1Ybo"
+    server_url: str
+    realm_name: str
+    keycloak_client_id: str
+    keycloak_client_secret: str
+    google_client_id: str
+    google_client_secret: str
+    github_client_id: str
+    github_client_secret: str
+    keycloak_client_url_id: str
 
 
 @lru_cache

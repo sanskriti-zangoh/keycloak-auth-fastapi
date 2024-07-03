@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routers import (
     auth_router,
 )
+from api.routers.keyauth import router as keyauth_router
 
 
 app = FastAPI()
@@ -24,3 +25,4 @@ async def root():
     return {"message": "Hello World"}
 
 app.include_router(auth_router)
+app.include_router(keyauth_router)
