@@ -20,7 +20,7 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: str
 
 # Helper function to get a token
 
@@ -36,10 +36,13 @@ async def get_token(username: str, password: str):
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, data=payload, headers=headers)  # Await the async post request
-    response.raise_for_status()
-    return response.json()
+    try: 
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, data=payload, headers=headers)  # Await the async post request
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
 
 # Helper function to verify a token
 def verify_token(token: str, credentials_exception):
