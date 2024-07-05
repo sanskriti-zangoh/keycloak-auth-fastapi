@@ -19,19 +19,22 @@ services:
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      DB_VENDOR: ${KEYCLOAK_DB_VENDOR}
+      DB_VENDOR: postgres
       DB_ADDR: postgres
       DB_DATABASE: ${POSTGRES_DB}
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
-      KEYCLOAK_USER: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: localhost
     ports:
       - "${KEYCLOAK_PORT}:8080"
     depends_on:
       - postgres
     command:
       - start-dev
+    volumes:
+      - type: volume
+        source: keycloak-volume
+        target: /opt/keycloak/data/
     networks:
       - keycloak-network
 
@@ -41,18 +44,22 @@ services:
       - "${FASTAPI_PORT}:5000"
     environment:
       DB_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
-      AUTH_SERVER_URL: http://keycloak:8080
-      AUTH_REALM_NAME: keyauth
-      AUTH_KEYCLOAK_CLIENT_ID: open_id_client
-      AUTH_KEYCLOAK_CLIENT_SECRET: PBi1RAX9Jy5jQhmUPan4zOIGmrKhTaQq
     depends_on:
       - keycloak
       - postgres
+    volumes:
+      - ./keycloak_fastapi:/app
     networks:
       - keycloak-network
+    develop:
+      watch:
+        - path: ./keycloak_fastapi
+          target: /app
+          action: sync+restart
 
 volumes:
   postgres_data:
+  keycloak-volume:
 
 networks:
   keycloak-network:

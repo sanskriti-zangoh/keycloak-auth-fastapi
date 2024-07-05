@@ -1,3 +1,1 @@
-from api.routers.auth import (
-    router as auth_router
-)
+from api.routers.myauth import router as myauth_router

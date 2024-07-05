@@ -3,15 +3,16 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from fastapi.security import OAuth2AuthorizationCodeBearer, OAuth2PasswordBearer
-
 from fastapi import HTTPException
 from keycloak.exceptions import KeycloakAuthenticationError
+from jwt import PyJWKClient
+import jwt
 
 from core.settings import load_settings, AuthSettings
 auth: AuthSettings = load_settings("AuthSettings")
 
 keycloak_connection = KeycloakOpenIDConnection(
-                        server_url="http://keycloak:8080",
+                        server_url=f"http://keycloak:8080",
                         username='admin',
                         password='admin',
                         realm_name="keyauth",
@@ -25,7 +26,7 @@ keycloak_openid = KeycloakOpenID(
     server_url="http://keycloak:8080",
     client_id="open_id_client",
     realm_name="keyauth",
-    client_secret_key="PBi1RAX9Jy5jQhmUPan4zOIGmrKhTaQq",
+    client_secret_key="iBIGHeORlxkTvuTM1Ef81ZbMsistOL5f",
     verify=True)
 
 oauth2_idp_scheme = OAuth2AuthorizationCodeBearer(
@@ -36,12 +37,32 @@ oauth2_idp_scheme = OAuth2AuthorizationCodeBearer(
 
 router = APIRouter(prefix="/myauth", tags=["myauth"])
 
+
+@router.get("/decoded_token")
+async def valid_access_token(
+    token: str = Depends(oauth2_idp_scheme)
+):
+    try: 
+        token_info = keycloak_openid.decode_token(token)
+        return token_info
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    
+@router.get("/token")
+async def get_token():
+    pass
+
+
 async def get_current_user(token: str = Depends(oauth2_idp_scheme)):
     try:
         user_info = keycloak_openid.userinfo(token)
         return user_info
     except Exception as e:
-        raise HTTPException(status_code=401, detail="Invalid authentication")
+        raise HTTPException(status_code=401, detail=str(e))
+    
+    
+async def get_token_saml_user(token: str = Depends(oauth2_idp_scheme)):
+    pass
 
 class User(BaseModel):
     username: str
@@ -61,7 +82,7 @@ async def signup(user: User):
             "firstName": user.first_name,
             "lastName": user.last_name,
             "enabled": True,
-            "credentials": [{"type": "password", "value": "defaultpassword", "temporary": False},],
+            "credentials": [{"type": "password", "value": f"{user.password}", "temporary": False},],
         },
         exist_ok=False)
         return {"user_id": user_id}
@@ -78,7 +99,13 @@ async def me(user: dict = Depends(get_current_user)):
 @router.get("/logout")
 async def logout(user: dict = Depends(get_current_user)):
     try: 
-        keycloak_openid.logout(user['access_token'])
+        token_response = keycloak_openid.refresh_token(user['refresh_token'])
+        keycloak_openid.logout(token_response['refresh_token'])
         return {"status": "Logged out"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/certs")
+async def certs(user: dict = Depends(get_current_user)):
+    return keycloak_openid.certs()
+    
