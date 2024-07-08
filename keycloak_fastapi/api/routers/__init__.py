@@ -1,1 +1,1 @@
-from api.routers.myauth import router as myauth_router
+from api.routers.stackauth import router as stackauth_router

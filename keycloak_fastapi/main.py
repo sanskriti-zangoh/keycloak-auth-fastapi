@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers.myauth import router as myauth_router
+from api.routers.stackauth import router as stackauth_router
 
 
 app = FastAPI()
@@ -21,4 +21,4 @@ app.add_middleware(
 async def root():
     return {"message": "Hello World"}
 
-app.include_router(myauth_router)
+app.include_router(stackauth_router)
