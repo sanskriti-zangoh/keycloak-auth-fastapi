@@ -1,12 +1,14 @@
 
 from api.schemas import authConfiguration, User
+from uuid import UUID
+import requests
 
 
 settings = authConfiguration(
     server_url="http://keycloak:8080/",
     realm="keyauth",
     client_id="open_id_client",
-    client_secret="iBIGHeORlxkTvuTM1Ef81ZbMsistOL5f",
+    client_secret="iXEtOaTA7E6Zx58SXqvr1jYP30unYCQm",
     authorization_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/auth",
     token_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/token",
 )
@@ -76,6 +78,43 @@ async def get_user_info(payload: dict = Depends(get_payload)) -> User:
             realm_roles=payload.get("realm_access", {}).get("roles", []),
             client_roles=payload.get("resource_access", {}).get(settings.client_id, {}).get("roles", [])
         )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+async def get_user_id(payload: dict = Depends(get_payload)) -> UUID:
+    try:
+        return payload.get("sub")
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),  # "Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+async def get_realm_management_access_token() -> str:
+    try: 
+        ADMIN_USERNAME = "admin"
+        ADMIN_PASSWORD = "admin"
+        token_url = f"{settings.server_url}/realms/{settings.realm}/protocol/openid-connect/token"
+        token_data = {
+            'username': ADMIN_USERNAME,
+            'password': ADMIN_PASSWORD,
+            'grant_type': 'client_credentials',
+            'client_id': settings.client_id,
+            'client_secret': settings.client_secret
+        }
+        
+        token_response = requests.post(token_url, data=token_data)
+        if token_response.status_code != 200:
+            raise HTTPException(status_code=token_response.status_code, detail="Failed to obtain access token")
+
+        access_token = token_response.json().get('access_token')
+
+        return access_token
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

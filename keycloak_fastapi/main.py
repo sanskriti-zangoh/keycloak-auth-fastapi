@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers.stackauth import router as stackauth_router
+from api.routers.user import router as user_router
+from api.middleware.refresh_token import TokenRefreshMiddleware
 
 
 app = FastAPI()
@@ -21,4 +23,6 @@ app.add_middleware(
 async def root():
     return {"message": "Hello World"}
 
+# app.add_middleware(TokenRefreshMiddleware)
 app.include_router(stackauth_router)
+app.include_router(user_router)

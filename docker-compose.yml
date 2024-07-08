@@ -19,18 +19,19 @@ services:
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      DB_VENDOR: postgres
-      DB_ADDR: postgres
-      DB_DATABASE: ${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_DB_DATABASE: ${POSTGRES_DB}
       KC_HOSTNAME: localhost
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
     ports:
       - "${KEYCLOAK_PORT}:8080"
     depends_on:
       - postgres
-    command:
-      - start-dev
+    command: start-dev
     volumes:
       - type: volume
         source: keycloak-volume
@@ -51,11 +52,6 @@ services:
       - ./keycloak_fastapi:/app
     networks:
       - keycloak-network
-    develop:
-      watch:
-        - path: ./keycloak_fastapi
-          target: /app
-          action: sync+restart
 
 volumes:
   postgres_data:
