@@ -1,50 +1,44 @@
-from pydantic import (
-    BaseModel, 
-    EmailStr, 
-    AnyHttpUrl
-)
+"""
+Schemas for authentication
+"""
 
-class SignUpRequest(BaseModel):
-    name: str
-    email: EmailStr
-    password: str
-
-class ResponseUser(BaseModel):
-    username: str
-    name: str
-    email: EmailStr
-    pic: AnyHttpUrl
-
-class SignUpResponse(BaseModel):
-    message: str
-    user: ResponseUser
-
-class LoginPasswordRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-class LoginPasswordResponse(BaseModel):
-    message: str
-    user: ResponseUser
-
-class LoginGoogleRequest(BaseModel):
-    token: str
-
-class LoginGoogleResponse(BaseModel):
-    message: str
-    user: ResponseUser
-
-class LoginGithubRequest(BaseModel):
-    token: str
-
-class LoginGithubResponse(BaseModel):
-    message: str
-    user: ResponseUser
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+from pydantic import BaseModel, EmailStr
+from uuid import UUID
 
 class User(BaseModel):
+    """
+    The User model
+    Fields:
+        id: UUID
+        username: str
+        email: str
+        first_name: str
+        last_name: str
+        realm_roles: list
+        client_roles: list
+    """
+    id: UUID
     username: str
     email: str
+    first_name: str
+    last_name: str
+    realm_roles: list
+    client_roles: list
+
+class authConfiguration(BaseModel):
+        """
+        The authConfiguration model
+        Fields:
+            server_url: str
+            realm: str
+            client_id: str
+            client_secret: str
+            authorization_url: str
+            token_url: str
+        """
+        server_url: str
+        realm: str
+        client_id: str
+        client_secret: str
+        authorization_url: str
+        token_url: str
