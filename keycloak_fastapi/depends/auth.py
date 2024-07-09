@@ -20,8 +20,9 @@ import jwt
 
 # This is used for fastapi docs authentification
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=settings.authorization_url,  # https://sso.example.com/auth/
-    tokenUrl=settings.token_url,  # https://sso.example.com/auth/realms/example-realm/protocol/openid-connect/token
+    authorizationUrl=settings.authorization_url,
+    tokenUrl=settings.token_url,
+    scopes={"offline_access": "Access refresh token"},
     refreshUrl=settings.token_url
 )
 
@@ -75,6 +76,7 @@ async def get_user_info(payload: dict = Depends(get_payload)) -> User:
             email=payload.get("email"),
             first_name=payload.get("given_name"),
             last_name=payload.get("family_name"),
+            email_verified=payload.get("email_verified"),
             realm_roles=payload.get("realm_access", {}).get("roles", []),
             client_roles=payload.get("resource_access", {}).get(settings.client_id, {}).get("roles", [])
         )

@@ -22,6 +22,7 @@ class User(BaseModel):
     email: str
     first_name: str
     last_name: str
+    email_verified: bool
     realm_roles: list
     client_roles: list
 
