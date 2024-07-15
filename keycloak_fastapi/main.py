@@ -6,9 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routers.stackauth import router as stackauth_router
 from api.routers.user import router as user_router
 from api.routers.test import router as test_router
+from api.routers.admin import router as admin_router
 # from api.middleware.refresh_token import TokenRefreshMiddleware
 from api.middleware.refresh_token_new import TokenRefreshMiddleware
 from depends.auth import settings
+
+from core.lifespan import lifespan
 
 
 app = FastAPI()
@@ -37,3 +40,4 @@ async def root():
 app.include_router(stackauth_router)
 app.include_router(user_router)
 app.include_router(test_router)
+app.include_router(admin_router)

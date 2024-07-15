@@ -19,7 +19,7 @@ from keycloak import KeycloakOpenID # pip require python-keycloak
 from fastapi import Security, HTTPException, status, Depends
 import jwt
 
-# This is used for fastapi docs authentification
+# This is used for fastapi docs authentication
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
     authorizationUrl=settings.authorization_url,
     tokenUrl=settings.token_url,
@@ -124,3 +124,16 @@ async def get_realm_management_access_token() -> str:
             detail=str(e),  # "Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+def has_role(role_name: str):
+    async def check_role(
+        token_data: dict = Depends(get_payload),
+    ):
+        try:
+            roles = token_data["resource_access"][settings.client_id]["roles"]
+            if role_name not in roles:
+                raise HTTPException(status_code=403, detail="Unauthorized access")
+        except Exception as e:
+            raise HTTPException(status_code=403, detail="Unauthorized access")
+
+    return check_role
