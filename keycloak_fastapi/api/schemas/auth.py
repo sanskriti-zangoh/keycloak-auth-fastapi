@@ -43,3 +43,4 @@ class authConfiguration(BaseModel):
         client_secret: str
         authorization_url: str
         token_url: str
+        refresh_url: str

@@ -11,6 +11,7 @@ settings = authConfiguration(
     client_secret="9LfRz2LmaEK61Qj8Nzgh3dxe1jpB8LVk",
     authorization_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/auth",
     token_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/token",
+    refresh_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/token"
 )
 #/auth.py
 from fastapi.security import OAuth2AuthorizationCodeBearer
