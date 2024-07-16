@@ -1,0 +1,2 @@
+CREATE DATABASE fastapi;
+CREATE DATABASE keycloak;
