@@ -6,3 +6,7 @@ from api.schemas.auth import (
 from api.schemas.role import (
     RoleRepresentation
 )
+
+from api.schemas.project import (
+    CreateProject
+)
