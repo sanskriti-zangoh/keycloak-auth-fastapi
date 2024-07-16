@@ -14,7 +14,7 @@ from depends.auth import settings
 from core.lifespan import lifespan
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

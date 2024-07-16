@@ -13,10 +13,10 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy import event
 from database.models import VSQLModel
 
-from core.settings import load_settings
+from core.settings import load_settings, DatabaseSettings
 
 
-dbs = load_settings("DatabaseSettings")
+dbs: DatabaseSettings = load_settings("DatabaseSettings")
 
 engine = create_async_engine(
     dbs.url,
@@ -25,11 +25,11 @@ engine = create_async_engine(
     pool_recycle=dbs.pool_recycle,
 )
 
-@event.listens_for(engine.sync_engine, "connect")
-def enable_foreign_keys(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
+# @event.listens_for(engine.sync_engine, "connect")
+# def enable_foreign_keys(dbapi_connection, connection_record):
+#     cursor = dbapi_connection.cursor()
+#     cursor.execute("PRAGMA foreign_keys=ON")
+#     cursor.close()
 
 AsyncSessionFactory = async_sessionmaker(
     bind=engine, autoflush=False, expire_on_commit=False
@@ -55,5 +55,8 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         await session.close()
 
 
-def init_db():
-    VSQLModel.metadata.create_all(engine)
+async def init_db():
+    print(engine.url)
+    async with engine.begin() as conn:
+        # await conn.run_sync(SQLModel.metadata.drop_all)
+        await conn.run_sync(VSQLModel.metadata.create_all)

@@ -4,6 +4,7 @@ from sqlalchemy.orm import declared_attr
 from datetime import datetime, timezone
 from typing import Type, TypeVar, List
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func
 
 class SQLModel(_SQLModel):
     @declared_attr  # type: ignore
@@ -38,11 +39,11 @@ class VSQLModel(SQLModel):
 
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": datetime.now(timezone.utc)}
+        sa_column_kwargs={"onupdate": func.now()}
     )
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"server_default": "CURRENT_TIMESTAMP"}
+        sa_column_kwargs={"server_default": func.now()}
     )
     @classmethod
     async def get_all(cls: Type[VSQLModelType], session: AsyncSession) -> List[VSQLModelType]:
