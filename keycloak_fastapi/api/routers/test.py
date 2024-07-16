@@ -4,17 +4,7 @@ from api.schemas import authConfiguration
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 import requests
-
-
-settings = authConfiguration(
-    server_url="http://keycloak:8080",
-    realm="keyauth",
-    client_id="open_id_client",
-    client_secret="9LfRz2LmaEK61Qj8Nzgh3dxe1jpB8LVk",
-    authorization_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/auth",
-    token_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/token",
-    refresh_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/token"
-)
+from core.settings import settings
 
 open_id = KeyCloakOIDC(settings)
 

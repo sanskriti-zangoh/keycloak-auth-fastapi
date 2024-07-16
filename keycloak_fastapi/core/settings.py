@@ -5,6 +5,7 @@ Settings Module.
 from functools import lru_cache
 from dotenv import find_dotenv, load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from api.schemas.auth import authConfiguration
 
 class DatabaseSettings(BaseSettings):
     """
@@ -44,6 +45,7 @@ class AuthSettings(BaseSettings):
         env_file=".env", env_prefix="AUTH_", case_sensitive=False, extra="ignore"
     )
     server_url: str
+    docker_server_url: str
     realm_name: str
     keycloak_client_id: str
     keycloak_client_secret: str
@@ -68,3 +70,15 @@ def load_settings(settings_cls_name: str) -> BaseSettings:
     load_dotenv(find_dotenv())
     settings_cls = globals()[settings_cls_name]
     return settings_cls()
+
+settings_env: AuthSettings = load_settings("AuthSettings")
+
+settings = authConfiguration(
+    server_url=settings_env.docker_server_url,
+    realm=settings_env.realm_name,
+    client_id=settings_env.keycloak_client_id,
+    client_secret=settings_env.keycloak_client_secret,
+    authorization_url=f"{settings_env.server_url}/realms/{settings_env.realm_name}/protocol/openid-connect/auth",
+    token_url=f"{settings_env.server_url}/realms/{settings_env.realm_name}/protocol/openid-connect/token",
+    refresh_url=f"{settings_env.server_url}/realms/{settings_env.realm_name}/protocol/openid-connect/token"
+)

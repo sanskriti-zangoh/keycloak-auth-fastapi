@@ -2,17 +2,9 @@
 from api.schemas import authConfiguration, User
 from uuid import UUID
 import requests
+from core.settings import settings
 
 
-settings = authConfiguration(
-    server_url="http://keycloak:8080/",
-    realm="keyauth",
-    client_id="open_id_client",
-    client_secret="9LfRz2LmaEK61Qj8Nzgh3dxe1jpB8LVk",
-    authorization_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/auth",
-    token_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/token",
-    refresh_url="http://localhost:8080/realms/keyauth/protocol/openid-connect/token"
-)
 #/auth.py
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from keycloak import KeycloakOpenID # pip require python-keycloak
