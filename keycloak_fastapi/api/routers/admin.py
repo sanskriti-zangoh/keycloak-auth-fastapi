@@ -58,7 +58,7 @@ async def integrated(
     else:
         return {"message": "Hello User", "data": user}
     
-@router.get("integrated/final")
+@router.get("/integrated/final")
 async def integrated(is_admin: bool = Depends(has_role_bool("admin")), user: User = Depends(get_user_info), payload: dict = Depends(get_payload)):
     try:
         if is_admin:

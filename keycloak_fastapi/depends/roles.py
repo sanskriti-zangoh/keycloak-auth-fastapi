@@ -5,7 +5,7 @@ from api.schemas import RoleRepresentation
 from fastapi import HTTPException
 from fastapi import status
 
-keycloak_admin = KeycloakAdmin(server_url=settings_env.server_url,
+keycloak_admin = KeycloakAdmin(server_url=settings.server_url,
                                realm_name=settings.realm,
                                client_id=settings.client_id,
                                client_secret_key=settings.client_secret,
