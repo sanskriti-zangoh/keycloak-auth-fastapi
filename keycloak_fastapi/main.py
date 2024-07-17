@@ -8,6 +8,7 @@ from api.routers.user import router as user_router
 from api.routers.test import router as test_router
 from api.routers.admin import router as admin_router
 from api.routers.project import router as project_router
+from api.routers.project_role import router as project_role_router
 # from api.middleware.refresh_token import TokenRefreshMiddleware
 from api.middleware.refresh_token_new import TokenRefreshMiddleware
 from depends.auth import settings
@@ -43,3 +44,4 @@ app.include_router(user_router)
 app.include_router(test_router)
 app.include_router(admin_router)
 app.include_router(project_router)
+app.include_router(project_role_router)
