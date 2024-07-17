@@ -3,12 +3,13 @@ from api.schemas import authConfiguration, User
 from uuid import UUID
 import requests
 from core.settings import settings
+from typing import Optional, Tuple
 
 
 #/auth.py
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from keycloak import KeycloakOpenID # pip require python-keycloak
-from fastapi import Security, HTTPException, status, Depends
+from fastapi import Security, HTTPException, status, Depends, Request
 import jwt
 
 # This is used for fastapi docs authentication
@@ -59,7 +60,7 @@ async def get_payload(token: str = Security(oauth2_scheme)) -> dict:
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         )
-
+    
 # Get user infos from the payload
 async def get_user_info(payload: dict = Depends(get_payload)) -> User:
     try:
@@ -79,6 +80,7 @@ async def get_user_info(payload: dict = Depends(get_payload)) -> User:
             detail=str(e),  # "Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     
 async def get_user_id(payload: dict = Depends(get_payload)) -> UUID:
     try:
@@ -129,3 +131,41 @@ def has_role(role_name: str):
             raise HTTPException(status_code=403, detail="Unauthorized access")
 
     return check_role
+
+
+async def check_admin_role(
+    token_data: dict = Depends(get_payload),
+):
+    try:
+        roles = token_data["resource_access"][settings.client_id]["roles"]
+        if "admin" not in roles:
+            return "user"
+        else:
+            return "admin"
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Unauthorized access")
+    
+def has_role_bool(role_name: str):  
+    async def check_role(token_data: dict = Depends(get_payload)) -> bool:
+        try:
+            if "resource_access" in token_data:
+                if settings.client_id in token_data["resource_access"]:
+                    if "roles" in token_data["resource_access"][settings.client_id]:
+                        if role_name in token_data["resource_access"][settings.client_id]["roles"]:
+                            return True
+            return False
+        except Exception as e:
+            raise HTTPException(status_code=403, detail=str(e))
+
+    return check_role
+
+async def check_role(role_name: str, token_data: dict = Depends(get_payload)) -> bool:
+        try:
+            if "resource_access" in token_data:
+                if settings.client_id in token_data["resource_access"]:
+                    if "roles" in token_data["resource_access"][settings.client_id]:
+                        if role_name in token_data["resource_access"][settings.client_id]["roles"]:
+                            return True
+            return False
+        except Exception as e:
+            raise HTTPException(status_code=403, detail=str(e))
